@@ -1,0 +1,76 @@
+const express = require('express');
+const axios = require('axios');
+const router = express.Router();
+
+function demoGenerate(platform, prompt, length) {
+  // Simple heuristic template to mimic AI when key is not present.
+  const base = prompt.trim();
+  const shortTitle = `${base.slice(0, 60)} | Must Watch`;
+  const longTitle = `🔥 ${base} — Proven Tips to Boost Views on ${platform}`;
+  const title = (length === 'long') ? longTitle : shortTitle;
+
+  const description = `Watch this ${platform} content on "${base}" — actionable steps, quick tips and ideas to grow your audience. Use this video to attract viewers and increase watch time. #ViewsGrow`;
+
+  const hashtags = (() => {
+    const tokens = base.toLowerCase().split(/\s+/).slice(0,5).map(t => t.replace(/[^a-z0-9]/g,''));
+    return ['#'+tokens.join(' #'), '#viral', '#trending'].join(' ');
+  })();
+
+  const keywords = base.toLowerCase().split(/\s+/).slice(0,10).join(', ')
+
+  return { title, description, hashtags, keywords };
+}
+
+// POST /api/generate
+router.post('/generate', async (req, res) => {
+  try {
+    const { platform, prompt, length } = req.body || {};
+    if (!platform || !prompt) return res.status(400).json({ success:false, error:'platform and prompt required' });
+
+    const forceDemo = (process.env.FORCE_DEMO || 'false').toLowerCase() === 'true';
+    const apiKey = process.env.OPENAI_API_KEY;
+
+    if (!apiKey || forceDemo) {
+      // Demo mode
+      const out = demoGenerate(platform, prompt, length || 'short');
+      return res.json({ success: true, source: 'demo', data: out });
+    }
+
+    // Real OpenAI call (Chat Completions)
+    const system = `You are ViewsGrow AI assistant. Generate concise, SEO-friendly content for social media. Output ONLY JSON with keys: title, description, hashtags, keywords. No extra text.`;
+    const user = `Platform: ${platform}\nTopic: ${prompt}\nLength: ${length || 'short'}`;
+
+    const payload = {
+      model: "gpt-4o-mini", // change if necessary
+      messages: [
+        { role: 'system', content: system },
+        { role: 'user', content: user }
+      ],
+      temperature: 0.7,
+      max_tokens: 400
+    };
+
+    const response = await axios.post('https://api.openai.com/v1/chat/completions', payload, {
+      headers: { Authorization: `Bearer ${apiKey}` }
+    });
+
+    let text = response.data.choices?.[0]?.message?.content || '';
+    // Try parse JSON
+    let parsed = null;
+    try {
+      parsed = JSON.parse(text);
+    } catch (e) {
+      // extract JSON substring
+      const m = text.match(/\{[\s\S]*\}/);
+      if (m) parsed = JSON.parse(m[0]);
+      else parsed = { title: text.slice(0,200), description: text.slice(200,800) };
+    }
+
+    return res.json({ success:true, source:'openai', data: parsed });
+  } catch (err) {
+    console.error('AI generate error:', err?.response?.data || err.message);
+    return res.status(500).json({ success:false, error: 'Server error generating content', details: err?.response?.data || err.message });
+  }
+});
+
+module.exports = router;
