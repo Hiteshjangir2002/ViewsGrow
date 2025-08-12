@@ -1,0 +1,23 @@
+import React from 'react';
+export default function Header(){
+  return (
+    <header className="bg-white shadow sticky top-0 z-40">
+      <div className="max-w-5xl mx-auto px-4 py-4 flex items-center justify-between">
+        <div className="flex items-center gap-3">
+          <div className="bg-gradient-to-tr from-sky-400 to-indigo-600 p-2 rounded">
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="white"><rect width="24" height="24" rx="4"/></svg>
+          </div>
+          <div>
+            <h1 className="text-xl font-bold text-dark">ViewsGrow</h1>
+            <p className="text-xs text-gray-500">AI Content Booster for Creators</p>
+          </div>
+        </div>
+        <nav className="space-x-4 hidden md:flex">
+          <a href="#app" className="text-sm text-gray-600 hover:text-dark">Generator</a>
+          <a href="#how" className="text-sm text-gray-600 hover:text-dark">How</a>
+          <a href="#pro" className="text-sm text-gray-600 hover:text-dark">Pro</a>
+        </nav>
+      </div>
+    </header>
+  );
+}
