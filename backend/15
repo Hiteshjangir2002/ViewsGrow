@@ -1,0 +1,32 @@
+import React from 'react';
+import Header from './components/Header';
+import GeneratorForm from './components/GeneratorForm';
+
+export default function App(){
+  return (
+    <div className="min-h-screen">
+      <Header />
+      <main className="max-w-5xl mx-auto px-4 py-10">
+        <section className="text-center mb-8">
+          <h2 className="text-4xl font-extrabold text-dark">ViewsGrow AI</h2>
+          <p className="text-gray-600 mt-2">Generate viral titles, SEO descriptions and hashtags for YouTube, Instagram & TikTok — powered by AI.</p>
+        </section>
+
+        <GeneratorForm />
+
+        <section id="how" className="mt-12 bg-white p-6 rounded-lg shadow">
+          <h3 className="text-xl font-bold">How it works</h3>
+          <ol className="list-decimal pl-6 mt-3 text-gray-700">
+            <li>Enter topic & select platform</li>
+            <li>Click Generate — backend calls AI (or demo) to craft optimized content</li>
+            <li>Copy & paste to your social platform</li>
+          </ol>
+        </section>
+      </main>
+
+      <footer className="bg-dark text-white py-6 text-center">
+        <div className="max-w-5xl mx-auto">© 2025 ViewsGrow • Built for creators</div>
+      </footer>
+    </div>
+  )
+}
